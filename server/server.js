@@ -16,6 +16,19 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected');
 
+  // Emitting
+  socket.emit('newMessage', {
+    from: 'anonymous',
+    text: 'wassup!',
+    createdAt: new Date()
+  });
+
+  // Listening
+  socket.on('createMessage', (message) => {
+    console.log('createMessage', message);
+  });
+
+  // Listening
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
