@@ -43,14 +43,22 @@ io.on('connection', (socket) => {
 
   // Listening to emitters from clients
   socket.on('createMessage', (message, callback) => {
-    console.log('createMessage', message);
-    // emit to every single connection
-    io.emit('newMessage', generateMessage(message.from, message.text));
+    let user = users.getUser(socket.id);
+    if(user && isRealString(message.text)) {
+      // emit to just the room
+      // from the user
+      io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+    }
+
     callback();
   });
 
   socket.on('createLocationMessage', (coords) => {
-    io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+    // find user and if it exists, emit to people in same room with users real name
+    let user = users.getUser(socket.id);
+    if(user) {
+      io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+    }
   });
 
   socket.on('disconnect', () => {
